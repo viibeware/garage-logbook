@@ -3,14 +3,14 @@ from functools import wraps
 from flask import (Flask, render_template, request, jsonify,
                    redirect, url_for, session, g, Response, send_from_directory)
 
-APP_VERSION = '0.1.7'
+APP_VERSION = '0.1.8'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'change-this-to-a-random-secret-key-in-production')
 app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads'))
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
-ALLOWED_EXTENSIONS = {'png','jpg','jpeg','gif','webp'}
+ALLOWED_EXTENSIONS = {'png','jpg','jpeg','gif','webp','pdf'}
 ROLES = {'admin','editor','viewer'}
 DATABASE = os.environ.get('DATABASE_PATH', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'garage_logbook.db'))
 
@@ -61,7 +61,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS maintenance_images (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             maintenance_id INTEGER NOT NULL, filename TEXT NOT NULL,
-            original_name TEXT, created_at TEXT DEFAULT (datetime('now')),
+            original_name TEXT, file_type TEXT NOT NULL DEFAULT 'image',
+            created_at TEXT DEFAULT (datetime('now')),
             FOREIGN KEY (maintenance_id) REFERENCES maintenance(id) ON DELETE CASCADE
         );
         CREATE TABLE IF NOT EXISTS user_settings (
@@ -104,6 +105,13 @@ def init_db():
             """)
             conn.commit()
     except Exception: pass
+    # Migration: add file_type column to maintenance_images if missing
+    try:
+        cols = [r['name'] for r in conn.execute("PRAGMA table_info(maintenance_images)").fetchall()]
+        if 'file_type' not in cols:
+            conn.execute("ALTER TABLE maintenance_images ADD COLUMN file_type TEXT NOT NULL DEFAULT 'image'")
+            conn.commit()
+    except Exception: pass
     conn.close()
 
 def save_upload(file, subfolder):
@@ -115,6 +123,11 @@ def save_upload(file, subfolder):
         file.save(os.path.join(folder, fn))
         return fn
     return None
+
+def get_file_type(filename):
+    if filename and filename.rsplit('.',1)[1].lower() == 'pdf':
+        return 'document'
+    return 'image'
 
 # ── Auth Middleware ─────────────────────────────────────
 @app.before_request
@@ -465,7 +478,10 @@ def add_maintenance(cid):
     mid = cur.lastrowid
     for f in request.files.getlist('gallery'):
         fn = save_upload(f, 'maintenance')
-        if fn: conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name) VALUES (?,?,?)',(mid,fn,f.filename))
+        if fn: conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name,file_type) VALUES (?,?,?,?)',(mid,fn,f.filename,get_file_type(fn)))
+    for f in request.files.getlist('documents'):
+        fn = save_upload(f, 'maintenance')
+        if fn: conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name,file_type) VALUES (?,?,?,?)',(mid,fn,f.filename,'document'))
     conn.commit()
     entry = dict(conn.execute('SELECT * FROM maintenance WHERE id=?',(mid,)).fetchone())
     entry['images'] = [dict(i) for i in conn.execute('SELECT * FROM maintenance_images WHERE maintenance_id=?',(mid,)).fetchall()]
@@ -499,7 +515,10 @@ def update_maintenance(mid):
         (t, mt, sd, odo_val, v or None, cost_val, n or None, mid))
     for f in request.files.getlist('gallery'):
         fn = save_upload(f, 'maintenance')
-        if fn: conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name) VALUES (?,?,?)',(mid,fn,f.filename))
+        if fn: conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name,file_type) VALUES (?,?,?,?)',(mid,fn,f.filename,get_file_type(fn)))
+    for f in request.files.getlist('documents'):
+        fn = save_upload(f, 'maintenance')
+        if fn: conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name,file_type) VALUES (?,?,?,?)',(mid,fn,f.filename,'document'))
     conn.commit()
     updated = dict(conn.execute('SELECT * FROM maintenance WHERE id=?',(mid,)).fetchone())
     updated['images'] = [dict(i) for i in conn.execute('SELECT * FROM maintenance_images WHERE maintenance_id=?',(mid,)).fetchall()]
@@ -551,8 +570,13 @@ def add_maintenance_images(mid):
     for f in request.files.getlist('gallery'):
         fn = save_upload(f, 'maintenance')
         if fn:
-            conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name) VALUES (?,?,?)',(mid,fn,f.filename))
-            added.append({'filename':fn,'original_name':f.filename})
+            conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name,file_type) VALUES (?,?,?,?)',(mid,fn,f.filename,get_file_type(fn)))
+            added.append({'filename':fn,'original_name':f.filename,'file_type':'image'})
+    for f in request.files.getlist('documents'):
+        fn = save_upload(f, 'maintenance')
+        if fn:
+            conn.execute('INSERT INTO maintenance_images (maintenance_id,filename,original_name,file_type) VALUES (?,?,?,?)',(mid,fn,f.filename,'document'))
+            added.append({'filename':fn,'original_name':f.filename,'file_type':'document'})
     conn.commit()
     conn.close()
     return jsonify(added), 201
