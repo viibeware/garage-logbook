@@ -1,6 +1,6 @@
 # Garage Logbook
 
-A self-hosted car maintenance tracker built with Flask and SQLite. Keep a detailed record of every repair, service, upgrade, and inspection across all your vehicles — with photos, costs, mileage, and full export/import support.
+Track your vehicle's service history from an elegantly simple, self-hosted web interface. It has image and document upload support (think pictures of repairs or receipt PDFs), role-based authentication, CSV import and export for existing maintenance records, and a performant dark-mode interface running in a Docker container for easy deployment. 
 
 Built and maintained by [viibeware Corp.](https://viibeware.com)
 
