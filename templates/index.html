@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garage Logbook — viibeware Corp.</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<script>
+const CURRENT_USER={id:{{user.id}},username:"{{user.username}}",display_name:"{{user.display_name}}",role:"{{user.role}}",must_change_password:{{user.must_change_password|default(0)}}};
+const APP_VERSION="{{version}}";
+</script>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><div class="logo"><img src="/static/garage-logbook_logo.svg" alt="" width="32" height="32"><span>Garage Logbook</span></div></div>
+    <nav class="sidebar-nav">
+        <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</button>
+        <button class="nav-btn" data-view="garage" onclick="switchView('garage')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>My Garage</button>
+        <button class="nav-btn" data-view="settings" onclick="switchView('settings')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</button>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="btn btn-primary btn-block editor-only" onclick="openModal('addCarModal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Vehicle</button>
+        <div class="sidebar-version" id="sidebarVersion"></div>
+        <a href="https://viibeware.com" target="_blank" rel="noopener" class="sidebar-branding"><img src="/static/viibeware_logo.svg" alt="" width="18" height="18"><span>viibeware Corp.</span></a>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-info"><div class="user-avatar" id="userAvatar"></div><div class="user-details"><span class="user-name" id="userName"></span><span class="user-role" id="userRole"></span></div></div>
+        <div class="user-actions">
+            <button class="btn btn-sm btn-ghost" onclick="openModal('changePwModal')" title="Change password"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></button>
+            <button class="btn btn-sm btn-ghost" onclick="doLogout()" title="Sign out"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+        </div>
+    </div>
+</aside>
+
+<header class="mobile-header">
+    <button class="hamburger" onclick="toggleSidebar()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <span class="mobile-title">Garage Logbook</span>
+    <button class="btn btn-sm btn-primary editor-only" onclick="openModal('addCarModal')">+ Add</button>
+</header>
+
+<main class="main-content">
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="view active">
+        <div class="view-header"><h1>Dashboard</h1></div>
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card clickable" onclick="switchView('garage')" title="View My Garage"><div class="stat-icon blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14M5 17a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2"/><circle cx="7.5" cy="17" r="2.5"/><circle cx="16.5" cy="17" r="2.5"/></svg></div><div class="stat-info"><span class="stat-value" id="statCars">0</span><span class="stat-label">Vehicles</span></div></div>
+            <div class="stat-card"><div class="stat-icon amber"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div><div class="stat-info"><span class="stat-value" id="statMaintenance">0</span><span class="stat-label">Service Records</span></div></div>
+            <div class="stat-card"><div class="stat-icon green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="stat-info"><span class="stat-value" id="statCost">$0</span><span class="stat-label">Total Spent</span></div></div>
+        </div>
+        <div class="section-block"><h2 class="section-title">Recent Activity</h2><div id="recentActivity" class="recent-list"><p class="empty-text">No maintenance records yet.</p></div></div>
+    </section>
+
+    <!-- Garage -->
+    <section id="view-garage" class="view">
+        <div class="view-header"><h1>My Garage</h1><div class="search-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="carSearch" placeholder="Search vehicles…" oninput="debouncedSearchCars()"></div></div>
+        <div id="carGrid" class="car-grid"><p class="empty-text">No vehicles added yet.</p></div>
+    </section>
+
+    <!-- Car Detail -->
+    <section id="view-car-detail" class="view">
+        <div class="view-header">
+            <button class="btn btn-ghost" onclick="switchView('garage')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back</button>
+            <div class="car-detail-title" id="carDetailTitle"></div>
+            <div class="view-header-actions">
+                <button class="btn btn-ghost admin-only" onclick="openImportForCar()" title="Import CSV"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import CSV</button>
+                <button class="btn btn-ghost" onclick="exportCarCSV()" title="Export CSV"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export All Records</button>
+                <button class="btn btn-primary editor-only" onclick="openAddMaintenanceModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Record</button>
+            </div>
+        </div>
+        <div class="car-detail-hero" id="carDetailHero"></div>
+        <div class="maintenance-toolbar">
+            <div class="search-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="maintSearch" placeholder="Search records…" oninput="debouncedSearchMaintenance()"></div>
+            <select id="maintSort" class="sort-select" onchange="loadMaintenance()"><option value="date_desc">Newest First</option><option value="date_asc">Oldest First</option><option value="cost_desc">Highest Cost</option><option value="cost_asc">Lowest Cost</option><option value="odo_desc">Highest Mileage</option></select>
+        </div>
+        <div id="maintenanceList" class="maintenance-list"></div>
+    </section>
+
+    <!-- Settings (with Users and Import tabs for admin) -->
+    <section id="view-settings" class="view">
+        <div class="view-header"><h1>Settings</h1></div>
+
+        <!-- Settings tabs -->
+        <div class="settings-tabs">
+            <button class="settings-tab active" onclick="switchSettingsTab('dashboard')">Dashboard</button>
+            <button class="settings-tab admin-only" onclick="switchSettingsTab('users')">Users</button>
+            <button class="settings-tab admin-only" onclick="switchSettingsTab('import')">Import CSV</button>
+        </div>
+
+        <!-- Dashboard Settings Tab -->
+        <div class="settings-tab-content active" id="settingsTab-dashboard">
+            <div class="settings-panel">
+                <h2 class="import-panel-title">Dashboard Preferences</h2>
+                <p class="import-panel-desc">Control what appears on your dashboard and the time range for statistics.</p>
+                <div class="settings-grid">
+                    <div class="setting-row"><label>Stats Time Range</label><select id="settingRange" onchange="saveSettingsDebounced()"><option value="all">All Time</option><option value="year">This Year</option><option value="month">This Month</option></select></div>
+                    <div class="setting-row"><label>Show Vehicles Count</label><label class="toggle"><input type="checkbox" id="settingShowVehicles" checked onchange="saveSettingsDebounced()"><span class="toggle-slider"></span></label></div>
+                    <div class="setting-row"><label>Show Service Records Count</label><label class="toggle"><input type="checkbox" id="settingShowRecords" checked onchange="saveSettingsDebounced()"><span class="toggle-slider"></span></label></div>
+                    <div class="setting-row"><label>Show Total Spent</label><label class="toggle"><input type="checkbox" id="settingShowCost" checked onchange="saveSettingsDebounced()"><span class="toggle-slider"></span></label></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab (admin only) -->
+        <div class="settings-tab-content" id="settingsTab-users">
+            <div class="settings-panel">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+                    <h2 class="import-panel-title" style="margin-bottom:0">User Management</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openModal('addUserModal')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add User</button>
+                </div>
+                <div id="usersList" class="users-list"></div>
+            </div>
+        </div>
+
+        <!-- Import CSV Tab (admin only) -->
+        <div class="settings-tab-content" id="settingsTab-import">
+            <div class="import-steps">
+                <div class="import-step active" id="importStep1Indicator"><div class="step-num">1</div><span>Upload</span></div><div class="import-step-divider"></div>
+                <div class="import-step" id="importStep2Indicator"><div class="step-num">2</div><span>Map</span></div><div class="import-step-divider"></div>
+                <div class="import-step" id="importStep3Indicator"><div class="step-num">3</div><span>Preview</span></div><div class="import-step-divider"></div>
+                <div class="import-step" id="importStep4Indicator"><div class="step-num">4</div><span>Import</span></div>
+            </div>
+            <div class="import-panel" id="importStep1">
+                <h2 class="import-panel-title">Upload a CSV file and select the target vehicle</h2>
+                <p class="import-panel-desc">Your CSV should have a header row.</p>
+                <div class="import-form-row"><div class="form-group" style="flex:1"><label>Target Vehicle <span class="req">*</span></label><select id="importCarSelect" class="import-select"><option value="">— Select a vehicle —</option></select></div></div>
+                <div class="import-form-row"><div class="form-group" style="flex:1"><label>CSV File <span class="req">*</span></label><div class="file-upload"><input type="file" id="csvFileInput" accept=".csv" onchange="onCsvFileSelected(this)"><div class="file-upload-label" id="csvFileLabel"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Click to select a CSV file</span></div></div><div class="csv-file-info" id="csvFileInfo" style="display:none"></div></div></div>
+                <div class="import-actions"><button class="btn btn-primary" id="importNextStep1" onclick="importGoToMapping()" disabled>Next: Map Fields →</button></div>
+            </div>
+            <div class="import-panel" id="importStep2" style="display:none">
+                <h2 class="import-panel-title">Map CSV columns to maintenance fields</h2>
+                <p class="import-panel-desc"><strong>Title</strong> and <strong>Service Date</strong> are required.</p>
+                <div class="mapping-grid" id="mappingGrid"></div>
+                <div class="import-actions"><button class="btn btn-ghost" onclick="importGoToStep(1)">← Back</button><button class="btn btn-primary" id="importNextStep2" onclick="importRunDryRun()">Run Dry Preview →</button></div>
+            </div>
+            <div class="import-panel" id="importStep3" style="display:none">
+                <h2 class="import-panel-title">Dry Run Preview</h2>
+                <div class="import-summary" id="importSummary"></div>
+                <div class="import-errors" id="importErrors" style="display:none"><div class="import-errors-header" onclick="document.getElementById('importErrorsList').classList.toggle('collapsed')"><span id="importErrorCount">0 warnings</span><span style="color:var(--text-muted);font-size:0.72rem;margin-left:auto">toggle</span></div><div id="importErrorsList" class="import-errors-list"></div></div>
+                <div class="import-preview-table-wrap"><table class="import-preview-table"><thead><tr id="importPreviewHead"></tr></thead><tbody id="importPreviewBody"></tbody></table></div>
+                <div class="import-actions"><button class="btn btn-ghost" onclick="importGoToStep(2)">← Back</button><button class="btn btn-primary" id="importCommitBtn" onclick="importCommit()">Import Valid Records</button></div>
+            </div>
+            <div class="import-panel" id="importStep4" style="display:none">
+                <div class="import-done"><div class="import-done-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 9 10.5 14.5 8 12"/></svg></div><h2 id="importDoneTitle">Import Complete</h2><p id="importDoneMsg" class="import-done-msg"></p><div class="import-actions" style="justify-content:center"><button class="btn btn-ghost" onclick="importReset()">Import Another</button><button class="btn btn-primary" onclick="importViewCar()">View Vehicle</button></div></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- ── Modals (Add Car, Edit Car, Add Maint, Edit Maint, View Maint, Users, Change PW, First PW) ── -->
+<div class="modal-overlay" id="addCarModal"><div class="modal modal-lg"><div class="modal-header"><h2>Add Vehicle</h2><button class="modal-close" onclick="closeModal('addCarModal')">&times;</button></div><form id="addCarForm" onsubmit="submitCar(event)"><div class="form-grid"><div class="form-group"><label>Year <span class="req">*</span></label><input type="number" name="year" min="1900" max="2099" required placeholder="e.g. 2012"></div><div class="form-group"><label>Make <span class="req">*</span></label><input type="text" name="make" required placeholder="e.g. Toyota"></div><div class="form-group"><label>Model <span class="req">*</span></label><input type="text" name="model" required placeholder="e.g. Tacoma"></div><div class="form-group"><label>VIN</label><input type="text" name="vin" maxlength="17" placeholder="17-character VIN"></div><div class="form-group"><label>Purchase Date</label><input type="date" name="purchase_date"></div><div class="form-group full-width"><label>Vehicle Photo</label><div class="file-upload"><input type="file" name="image" accept="image/*" onchange="previewFile(this,'carImagePreview')"><div class="file-upload-label" id="carImagePreview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Click or drag to upload</span></div></div></div></div><div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('addCarModal')">Cancel</button><button type="submit" class="btn btn-primary" id="addCarBtn">Add Vehicle</button></div></form></div></div>
+
+<div class="modal-overlay" id="editCarModal"><div class="modal modal-lg"><div class="modal-header"><h2>Edit Vehicle</h2><button class="modal-close" onclick="closeModal('editCarModal')">&times;</button></div><form id="editCarForm" onsubmit="submitEditCar(event)"><input type="hidden" name="car_id" id="editCarId"><div class="form-grid"><div class="form-group"><label>Year <span class="req">*</span></label><input type="number" name="year" id="editCarYear" min="1900" max="2099" required></div><div class="form-group"><label>Make <span class="req">*</span></label><input type="text" name="make" id="editCarMake" required></div><div class="form-group"><label>Model <span class="req">*</span></label><input type="text" name="model" id="editCarModel" required></div><div class="form-group"><label>VIN</label><input type="text" name="vin" id="editCarVin" maxlength="17"></div><div class="form-group"><label>Purchase Date</label><input type="date" name="purchase_date" id="editCarPurchaseDate"></div><div class="form-group full-width"><label>Vehicle Photo</label><div class="file-upload"><input type="file" name="image" accept="image/*" onchange="previewFile(this,'editCarImagePreview')"><div class="file-upload-label" id="editCarImagePreview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Click to change photo</span></div></div></div></div><div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('editCarModal')">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div></form></div></div>
+
+<div class="modal-overlay" id="addMaintModal"><div class="modal modal-lg"><div class="modal-header"><h2>Add Service Record</h2><button class="modal-close" onclick="closeModal('addMaintModal')">&times;</button></div><form id="addMaintForm" onsubmit="submitMaintenance(event)"><div class="form-grid"><div class="form-group full-width"><label>Title <span class="req">*</span></label><input type="text" name="title" required placeholder="e.g. Oil change"></div><div class="form-group"><label>Type <span class="req">*</span></label><div class="type-selector"><label class="type-option"><input type="radio" name="maintenance_type" value="Maintenance" required checked><span class="type-chip maintenance">Maintenance</span></label><label class="type-option"><input type="radio" name="maintenance_type" value="Repair"><span class="type-chip repair">Repair</span></label><label class="type-option"><input type="radio" name="maintenance_type" value="Upgrade"><span class="type-chip upgrade">Upgrade</span></label><label class="type-option"><input type="radio" name="maintenance_type" value="Inspection"><span class="type-chip inspection">Inspection</span></label></div></div><div class="form-group"><label>Service Date <span class="req">*</span></label><input type="date" name="service_date" required></div><div class="form-group"><label>Odometer</label><input type="number" name="odometer" min="0" placeholder="Miles"></div><div class="form-group"><label>Vendor</label><input type="text" name="parts_vendor" placeholder="e.g. AutoZone"></div><div class="form-group"><label>Cost</label><div class="input-prefix"><span>$</span><input type="number" name="cost" min="0" step="0.01" placeholder="0.00"></div></div><div class="form-group full-width"><label>Notes</label><textarea name="notes" rows="3" placeholder="Details…"></textarea></div><div class="form-group full-width"><label>Photos</label><div class="file-upload multi"><input type="file" name="gallery" accept="image/*" multiple onchange="previewGallery(this)"><div class="file-upload-label" id="maintGalleryPreview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Upload photos</span></div></div><div id="galleryThumbs" class="gallery-thumbs"></div></div></div><div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('addMaintModal')">Cancel</button><button type="submit" class="btn btn-primary" id="addMaintBtn">Save Record</button></div></form></div></div>
+
+<div class="modal-overlay" id="editMaintModal"><div class="modal modal-lg"><div class="modal-header"><h2>Edit Service Record</h2><button class="modal-close" onclick="closeModal('editMaintModal')">&times;</button></div><form id="editMaintForm" onsubmit="submitEditMaintenance(event)"><input type="hidden" name="maint_id" id="editMaintId"><div class="form-grid"><div class="form-group full-width"><label>Title <span class="req">*</span></label><input type="text" name="title" id="editMaintTitle" required></div><div class="form-group"><label>Type <span class="req">*</span></label><div class="type-selector"><label class="type-option"><input type="radio" name="maintenance_type" value="Maintenance" id="editMaintTypeMaint"><span class="type-chip maintenance">Maintenance</span></label><label class="type-option"><input type="radio" name="maintenance_type" value="Repair" id="editMaintTypeRepair"><span class="type-chip repair">Repair</span></label><label class="type-option"><input type="radio" name="maintenance_type" value="Upgrade" id="editMaintTypeUpgrade"><span class="type-chip upgrade">Upgrade</span></label><label class="type-option"><input type="radio" name="maintenance_type" value="Inspection" id="editMaintTypeInspection"><span class="type-chip inspection">Inspection</span></label></div></div><div class="form-group"><label>Service Date <span class="req">*</span></label><input type="date" name="service_date" id="editMaintDate" required></div><div class="form-group"><label>Odometer</label><input type="number" name="odometer" id="editMaintOdo" min="0"></div><div class="form-group"><label>Vendor</label><input type="text" name="parts_vendor" id="editMaintVendor"></div><div class="form-group"><label>Cost</label><div class="input-prefix"><span>$</span><input type="number" name="cost" id="editMaintCost" min="0" step="0.01"></div></div><div class="form-group full-width"><label>Notes</label><textarea name="notes" id="editMaintNotes" rows="3"></textarea></div><div class="form-group full-width"><label>Add Photos</label><div class="file-upload multi"><input type="file" name="gallery" accept="image/*" multiple><div class="file-upload-label"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Upload photos</span></div></div></div></div><div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('editMaintModal')">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div></form></div></div>
+
+<div class="modal-overlay" id="viewMaintModal"><div class="modal modal-lg"><div class="modal-header"><h2 id="viewMaintTitle">Record Detail</h2><button class="modal-close" onclick="closeModal('viewMaintModal')">&times;</button></div><div id="viewMaintContent" class="view-maint-content"></div><div class="modal-actions" id="viewMaintActions"></div></div></div>
+
+<div class="modal-overlay" id="addUserModal"><div class="modal"><div class="modal-header"><h2>Add User</h2><button class="modal-close" onclick="closeModal('addUserModal')">&times;</button></div><div class="form-grid"><div class="form-group"><label>Username <span class="req">*</span></label><input type="text" id="newUsername" autocomplete="off"></div><div class="form-group"><label>Display Name</label><input type="text" id="newDisplayName"></div><div class="form-group"><label>Password <span class="req">*</span></label><input type="password" id="newPassword" autocomplete="new-password"></div><div class="form-group"><label>Role</label><select id="newRole"><option value="viewer">Viewer</option><option value="editor">Editor</option><option value="admin">Admin</option></select></div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('addUserModal')">Cancel</button><button class="btn btn-primary" onclick="submitNewUser()">Create User</button></div></div></div>
+<div class="modal-overlay" id="editUserModal"><div class="modal"><div class="modal-header"><h2>Edit User</h2><button class="modal-close" onclick="closeModal('editUserModal')">&times;</button></div><input type="hidden" id="editUserId"><div class="form-grid"><div class="form-group full-width"><label>Username</label><input type="text" id="editUsername" disabled></div><div class="form-group"><label>Display Name</label><input type="text" id="editDisplayName"></div><div class="form-group"><label>Role</label><select id="editRole"><option value="viewer">Viewer</option><option value="editor">Editor</option><option value="admin">Admin</option></select></div><div class="form-group full-width"><label>New Password <span style="color:var(--text-muted);font-weight:400">(blank=keep)</span></label><input type="password" id="editPassword" autocomplete="new-password"></div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('editUserModal')">Cancel</button><button class="btn btn-primary" onclick="submitEditUser()">Save</button></div></div></div>
+<div class="modal-overlay" id="changePwModal"><div class="modal"><div class="modal-header"><h2>Change Password</h2><button class="modal-close" onclick="closeModal('changePwModal')">&times;</button></div><div class="form-grid"><div class="form-group full-width"><label>Current Password</label><input type="password" id="currentPw"></div><div class="form-group full-width"><label>New Password</label><input type="password" id="newPw" placeholder="Min 4 characters"></div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('changePwModal')">Cancel</button><button class="btn btn-primary" onclick="changePassword()">Update</button></div></div></div>
+
+<!-- Force password change modal (non-dismissable) -->
+<div class="modal-overlay" id="forceChangePwModal"><div class="modal"><div class="modal-header"><h2>Change Your Password</h2></div><div class="form-grid"><div class="form-group full-width"><p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px">You must change your password before continuing.</p></div><div class="form-group full-width"><label>New Password</label><input type="password" id="forceNewPw" placeholder="Min 4 characters"></div><div class="form-group full-width"><label>Confirm Password</label><input type="password" id="forceConfirmPw"></div></div><div class="modal-actions"><button class="btn btn-primary" onclick="forceChangePassword()">Set New Password</button></div></div></div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()"><button class="lightbox-close" onclick="closeLightbox()">&times;</button><button class="lightbox-nav prev" onclick="event.stopPropagation();lightboxPrev()">&#8249;</button><img id="lightboxImg" src="" alt=""><button class="lightbox-nav next" onclick="event.stopPropagation();lightboxNext()">&#8250;</button></div>
+<div id="toastContainer" class="toast-container"></div>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

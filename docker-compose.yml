@@ -1,0 +1,23 @@
+services:
+  garage-logbook:
+    build: .
+    container_name: garage-logbook
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - garage-data:/data
+    environment:
+      - SECRET_KEY=10020198c11512cbf77c28b9152e1ffe649e4c75c776d61558562c02533a1390
+      - DATABASE_PATH=/data/garage_logbook.db
+      - UPLOAD_FOLDER=/data/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/login')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  garage-data:
+    driver: local

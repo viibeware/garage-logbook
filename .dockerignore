@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+venv
+.git
+*.db
+*.db-wal
+*.db-shm
+setup.sh
+static/uploads/cars/*
+static/uploads/maintenance/*
