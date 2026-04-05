@@ -45,57 +45,48 @@ That's it. Everything else is handled by the container.
 mkdir ~/garage-logbook && cd ~/garage-logbook
 ```
 
-### 2. Download the compose file
+### 2. Download the compose file and environment template
 
 ```bash
-curl -o docker-compose.yml https://raw.githubusercontent.com/viibeware/garage-logbook/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/viibeware/garage-logbook/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/viibeware/garage-logbook/main/.env.example
 ```
 
-Or create `docker-compose.yml` manually with the following contents:
-
-```yaml
-services:
-  garage-logbook:
-    image: viibeware/garage-logbook:latest
-    container_name: garage-logbook
-    restart: unless-stopped
-    ports:
-      - "5000:5000"
-    volumes:
-      - garage-data:/data
-    environment:
-      - SECRET_KEY=CHANGE-ME-generate-a-random-string
-      - DATABASE_PATH=/data/garage_logbook.db
-      - UPLOAD_FOLDER=/data/uploads
-
-volumes:
-  garage-data:
-    driver: local
-```
-
-### 3. Generate a secret key
-
-Replace the placeholder `SECRET_KEY` value in `docker-compose.yml` with a random string:
+### 3. Create your environment file
 
 ```bash
-# Using Python
+cp .env.example .env
+```
+
+### 4. Generate a secret key and update the .env file
+
+Generate a key:
+
+```bash
 python3 -c "import secrets; print(secrets.token_hex(32))"
-
-# Or using OpenSSL
-openssl rand -hex 32
 ```
 
-Copy the output and paste it as the `SECRET_KEY` value in your compose file.
+Open `.env` in your editor and replace the `SECRET_KEY` placeholder with the generated value:
 
-### 4. Start the application
+```
+SECRET_KEY=your-generated-key-here
+```
+
+You can also change the port here if `5000` is already in use:
+
+```
+APP_PORT=8080
+```
+
+### 5. Start the application
 
 ```bash
 docker compose up -d
 ```
 
-### 5. Log in
+### 6. Log in
 
-Open your browser to `http://localhost:5000` (or your server's IP address).
+Open your browser to `http://localhost:5000` (or whatever port you configured).
 
 | | |
 |---|---|
@@ -115,32 +106,26 @@ docker compose pull
 docker compose up -d
 ```
 
-Your data is stored in a Docker volume and is not affected by updates.
+Your data is stored in a Docker volume and is not affected by updates. Your `.env` file remains untouched.
 
 ---
 
 ## Configuration
 
-All configuration is done through environment variables in `docker-compose.yml`.
+All configuration is managed through the `.env` file. The `.env.example` file documents every available option.
 
-| Variable | Description | Default |
-|---|---|---|
-| `SECRET_KEY` | Flask session encryption key. **Must be changed.** | `CHANGE-ME-...` |
-| `DATABASE_PATH` | Path to the SQLite database inside the container | `/data/garage_logbook.db` |
-| `UPLOAD_FOLDER` | Path to uploaded images inside the container | `/data/uploads` |
+| Variable | Required | Description | Default |
+|---|---|---|---|
+| `SECRET_KEY` | **Yes** | Flask session encryption key | — |
+| `APP_PORT` | No | Port the app is accessible on | `5000` |
+| `DATABASE_PATH` | No | Database path inside the container | `/data/garage_logbook.db` |
+| `UPLOAD_FOLDER` | No | Upload path inside the container | `/data/uploads` |
 
-### Changing the port
-
-To run on a different port, modify the `ports` mapping. The left side is the host port:
-
-```yaml
-ports:
-  - "8080:5000"  # Access on port 8080
-```
+> **Note:** The `.env` file contains your secret key and should not be committed to version control or shared publicly.
 
 ### Running behind a reverse proxy
 
-If you're running behind Nginx, Caddy, Nginx Proxy Manager, or similar, point the proxy to port `5000` on the container. No additional configuration is needed in the app itself.
+If you're running behind Nginx, Caddy, Nginx Proxy Manager, or similar, point the proxy to the port specified in `APP_PORT` (default `5000`). No additional configuration is needed in the app itself.
 
 ---
 
@@ -179,10 +164,12 @@ If you prefer to build the Docker image yourself rather than pulling from Docker
 ```bash
 git clone https://github.com/viibeware/garage-logbook.git
 cd garage-logbook
-docker build -t garage-logbook .
+cp .env.example .env
+# Edit .env and set your SECRET_KEY
+docker compose up -d --build
 ```
 
-Then update your `docker-compose.yml` to use `build: .` instead of `image: viibeware/garage-logbook:latest`.
+When building from source, the compose file will use `build: .` context. Update the `image:` line to `build: .` in `docker-compose.yml`, or simply remove the `image:` line and add `build: .` in its place.
 
 ### Running without Docker
 
@@ -194,6 +181,8 @@ cd garage-logbook
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+
+export SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
 python app.py
 ```
 
@@ -220,7 +209,8 @@ garage-logbook/
 ├── app.py                    # Flask application
 ├── requirements.txt          # Python dependencies
 ├── Dockerfile                # Container build instructions
-├── docker-compose.yml        # Development compose file
+├── docker-compose.yml        # Compose configuration
+├── .env.example              # Environment variable template
 ├── static/
 │   ├── css/style.css         # Stylesheet
 │   ├── js/app.js             # Frontend JavaScript
@@ -244,4 +234,4 @@ This project is provided as-is for personal and internal use. See the repository
 
 Garage Logbook is developed by [viibeware Corp.](https://viibeware.com)
 
-Current version: **0.1.6**
+Current version: **0.1.7**

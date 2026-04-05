@@ -3,7 +3,7 @@ from functools import wraps
 from flask import (Flask, render_template, request, jsonify,
                    redirect, url_for, session, g, Response, send_from_directory)
 
-APP_VERSION = '0.1.6'
+APP_VERSION = '0.1.7'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'change-this-to-a-random-secret-key-in-production')
