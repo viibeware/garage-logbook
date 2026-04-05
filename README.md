@@ -52,6 +52,67 @@ curl -O https://raw.githubusercontent.com/viibeware/garage-logbook/main/docker-c
 curl -O https://raw.githubusercontent.com/viibeware/garage-logbook/main/.env.example
 ```
 
+Or create the files manually:
+
+<details>
+<summary><strong>docker-compose.yml</strong></summary>
+
+```yaml
+services:
+  garage-logbook:
+    image: viibeware/garage-logbook:latest
+    container_name: garage-logbook
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-5000}:5000"
+    volumes:
+      - garage-data:/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/login')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  garage-data:
+    driver: local
+```
+
+</details>
+
+<details>
+<summary><strong>.env.example</strong></summary>
+
+```bash
+# Garage Logbook — Environment Configuration
+# Copy this file to .env and update the values below.
+#
+#   cp .env.example .env
+#
+
+# ─── REQUIRED ──────────────────────────────────────────
+# Session encryption key. Generate one with:
+#   python3 -c "import secrets; print(secrets.token_hex(32))"
+# or:
+#   openssl rand -hex 32
+SECRET_KEY=CHANGE-ME-replace-with-a-random-string
+
+# ─── OPTIONAL ──────────────────────────────────────────
+# Port the app is accessible on (default: 5000)
+APP_PORT=5000
+
+# Database path inside the container (typically no need to change)
+DATABASE_PATH=/data/garage_logbook.db
+
+# Upload folder inside the container (typically no need to change)
+UPLOAD_FOLDER=/data/uploads
+```
+
+</details>
+
 ### 3. Create your environment file
 
 ```bash
