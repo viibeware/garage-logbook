@@ -1,6 +1,6 @@
 services:
   garage-logbook:
-    build: .
+    image: viibeware/garage-logbook:latest
     container_name: garage-logbook
     restart: unless-stopped
     ports:

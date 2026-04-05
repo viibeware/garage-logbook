@@ -130,6 +130,18 @@ def get_file_type(filename):
     return 'image'
 
 # ── Auth Middleware ─────────────────────────────────────
+@app.errorhandler(413)
+def too_large(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'File too large. Maximum size is 32MB.'}), 413
+    return 'File too large', 413
+
+@app.errorhandler(500)
+def server_error(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Internal server error'}), 500
+    return 'Internal server error', 500
+
 @app.before_request
 def load_user():
     g.user = None
