@@ -23,89 +23,38 @@
         .form-group input{width:100%;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font:inherit;font-size:0.85rem;padding:11px 14px;outline:none;transition:border-color 0.2s}
         .form-group input:focus{border-color:var(--border-focus)}
         .btn-login{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;transition:background 0.2s;margin-top:6px}
-        .btn-login:hover{background:var(--accent-hover)}
-        .btn-login:disabled{opacity:0.5;cursor:not-allowed}
+        .btn-login:hover{background:var(--accent-hover)}.btn-login:disabled{opacity:0.5;cursor:not-allowed}
         .error-msg{color:var(--red);font-size:0.78rem;text-align:center;margin-top:14px;min-height:20px}
-        .success-msg{color:var(--green);font-size:0.78rem;text-align:center;margin-top:14px}
         .login-version{text-align:center;margin-top:18px;font-size:0.58rem;color:var(--text-muted);letter-spacing:0.05em}
-        .pw-change-panel{display:none}
-        .pw-change-panel.active{display:block}
-        .login-panel{display:block}
-        .login-panel.hidden{display:none}
+        .pw-change-panel{display:none}.pw-change-panel.active{display:block}
+        .login-panel{display:block}.login-panel.hidden{display:none}
     </style>
 </head>
 <body>
     <div class="login-card">
-        <div class="login-brand">
-            <img src="/static/garage-logbook_logo.svg" alt="Garage Logbook">
-            <h1>Garage Logbook</h1>
-            <span class="corp">viibeware Corp.</span>
-        </div>
-
-        <!-- Login Panel -->
+        <div class="login-brand"><img src="/static/garage-logbook_logo.svg" alt=""><h1>Garage Logbook</h1><span class="corp">viibeware Corp.</span></div>
         <div id="loginPanel" class="login-panel">
             <div class="form-group"><label>Username</label><input type="text" id="username" autocomplete="username" autofocus></div>
             <div class="form-group"><label>Password</label><input type="password" id="password" autocomplete="current-password"></div>
             <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In</button>
             <div class="error-msg" id="loginError"></div>
         </div>
-
-        <!-- First-login Password Change Panel -->
         <div id="pwChangePanel" class="pw-change-panel">
             <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:18px;text-align:center">You must change your password before continuing.</p>
             <div class="form-group"><label>New Password</label><input type="password" id="newPwFirst" placeholder="Min 4 characters" autocomplete="new-password"></div>
-            <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPwFirst" placeholder="Re-enter new password" autocomplete="new-password"></div>
-            <button class="btn-login" id="changePwBtn" onclick="doFirstPasswordChange()">Set New Password</button>
+            <div class="form-group"><label>Confirm Password</label><input type="password" id="confirmPwFirst" autocomplete="new-password"></div>
+            <button class="btn-login" onclick="doFirstPwChange()">Set New Password</button>
             <div class="error-msg" id="pwChangeError"></div>
         </div>
-
         <div class="login-version">v{{ version }}</div>
     </div>
     <script>
-        let tempOldPassword = '';
+        let tempOldPw='';
         document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
         document.getElementById('username').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('password').focus()});
-        document.getElementById('newPwFirst').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('confirmPwFirst').focus()});
-        document.getElementById('confirmPwFirst').addEventListener('keydown',e=>{if(e.key==='Enter')doFirstPasswordChange()});
-
-        async function doLogin(){
-            const btn=document.getElementById('loginBtn'),err=document.getElementById('loginError');
-            const u=document.getElementById('username').value.trim(),p=document.getElementById('password').value;
-            err.textContent='';
-            if(!u||!p){err.textContent='Please enter username and password';return}
-            btn.disabled=true;btn.textContent='Signing in…';
-            try{
-                const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
-                const d=await r.json();
-                if(!r.ok)throw new Error(d.error||'Failed');
-                if(d.must_change_password){
-                    tempOldPassword=p;
-                    document.getElementById('loginPanel').classList.add('hidden');
-                    document.getElementById('pwChangePanel').classList.add('active');
-                    document.getElementById('newPwFirst').focus();
-                }else{
-                    window.location.href='/';
-                }
-            }catch(e){err.textContent=e.message}
-            finally{btn.disabled=false;btn.textContent='Sign In'}
-        }
-
-        async function doFirstPasswordChange(){
-            const btn=document.getElementById('changePwBtn'),err=document.getElementById('pwChangeError');
-            const np=document.getElementById('newPwFirst').value,cp=document.getElementById('confirmPwFirst').value;
-            err.textContent='';
-            if(!np||!cp){err.textContent='Please fill in both fields';return}
-            if(np!==cp){err.textContent='Passwords do not match';return}
-            if(np.length<4){err.textContent='Password must be at least 4 characters';return}
-            btn.disabled=true;btn.textContent='Updating…';
-            try{
-                const r=await fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_password:tempOldPassword,new_password:np})});
-                const d=await r.json();
-                if(!r.ok)throw new Error(d.error||'Failed');
-                window.location.href='/';
-            }catch(e){err.textContent=e.message}
-            finally{btn.disabled=false;btn.textContent='Set New Password'}
-        }
+        document.getElementById('confirmPwFirst').addEventListener('keydown',e=>{if(e.key==='Enter')doFirstPwChange()});
+        async function doLogin(){const btn=document.getElementById('loginBtn'),err=document.getElementById('loginError');const u=document.getElementById('username').value.trim(),p=document.getElementById('password').value;err.textContent='';if(!u||!p){err.textContent='Enter username and password';return}btn.disabled=true;btn.textContent='Signing in…';try{const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(!r.ok)throw new Error(d.error);if(d.must_change_password){tempOldPw=p;document.getElementById('loginPanel').classList.add('hidden');document.getElementById('pwChangePanel').classList.add('active');document.getElementById('newPwFirst').focus()}else{window.location.href='/'}}catch(e){err.textContent=e.message}finally{btn.disabled=false;btn.textContent='Sign In'}}
+        async function doFirstPwChange(){const err=document.getElementById('pwChangeError');const np=document.getElementById('newPwFirst').value,cp=document.getElementById('confirmPwFirst').value;err.textContent='';if(!np||!cp){err.textContent='Fill both fields';return}if(np!==cp){err.textContent='Passwords do not match';return}if(np.length<4){err.textContent='Min 4 characters';return}try{const r=await fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_password:tempOldPw,new_password:np})});const d=await r.json();if(!r.ok)throw new Error(d.error);window.location.href='/'}catch(e){err.textContent=e.message}}
     </script>
 </body>
 </html>

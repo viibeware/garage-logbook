@@ -1,6 +1,6 @@
 # Garage Logbook
 
-Garage Logbook tracks your vehicle's service history from an elegantly simple, self-hosted web interface. It has image and document upload support (think pictures of repairs or receipt PDFs), role-based authentication, CSV import and export for existing maintenance records, and a performant dark-mode interface running in a Docker container for easy deployment. 
+Garage Logbook tracks your vehicle's service history from an elegantly simple, self-hosted web interface. It has image and document upload support (think pictures of repairs or receipt PDFs), role-based authentication, CSV import and export for existing maintenance records, and a performant dark-mode interface running in a Docker container for easy deployment.
 
 Built and maintained by [viibeware Corp.](https://viibeware.com)
 
@@ -8,22 +8,25 @@ Built and maintained by [viibeware Corp.](https://viibeware.com)
 
 ## Features
 
+- **Multi-User Support** — Each user has their own garage with isolated vehicles and maintenance records
 - **Vehicle Management** — Add, edit, and delete vehicles with year, make, model, VIN, purchase date, and photo
 - **Maintenance Records** — Log repairs, maintenance, upgrades, and inspections with date, mileage, vendor, cost, notes, and photo galleries
-- **Dashboard** — At-a-glance stats for total vehicles, service records, and money spent with configurable time ranges (monthly, yearly, all time)
-- **Search & Sort** — Live AJAX search across vehicles and maintenance records with multiple sort options
-- **CSV Import** — Import maintenance records from CSV files with field mapping and a dry-run preview before committing
-- **CSV Export** — Export all maintenance records for any vehicle as a CSV file
+- **PDF Receipts** — Upload PDF documents (receipts, invoices, estimates) to any maintenance record
+- **Dashboard** — At-a-glance stats for total vehicles, service records, and money spent with configurable time ranges
+- **Search & Sort** — Live search across vehicles and maintenance records with multiple sort options
+- **CSV Import & Export** — Import maintenance records from CSV files with field mapping and dry-run preview, or export all records for any vehicle
 - **Duplicate Records** — Quickly duplicate an existing maintenance record as a starting point
-- **Role-Based Access** — Three user roles with enforced permissions:
-  - **Admin** — Full access including user management and CSV import
-  - **Editor** — Can create, edit, and delete vehicles and records
-  - **Viewer** — Read-only access to all data
-- **User Management** — Admins can create, edit, and delete user accounts with role assignment
+- **Role-Based Access** — Two user roles with enforced permissions:
+  - **Admin** — Full access to all users' data, user management, and all features
+  - **Editor** — Configurable per-user permissions (see below)
+- **Granular Permissions** — Admins can toggle individual capabilities for each editor:
+  - Add / Edit / Delete vehicles
+  - Add / Edit / Delete maintenance records
+  - Import CSV / Export CSV
 - **First-Login Security** — Default admin account is forced to change password on first login
 - **Image Gallery** — Upload multiple photos per maintenance record with a lightbox viewer
-- **Per-User Settings** — Each user can customize their dashboard preferences
-- **Dark Theme** — Clean, modern interface designed for readability
+- **Light & Dark Theme** — Toggle between light and dark mode in Settings, saved per-user
+- **Per-User Settings** — Each user can customize their dashboard preferences and theme
 - **Mobile Responsive** — Works on desktop, tablet, and mobile
 - **Docker Ready** — Ships as a Docker image with persistent volume storage
 
@@ -190,6 +193,43 @@ If you're running behind Nginx, Caddy, Nginx Proxy Manager, or similar, point th
 
 ---
 
+## Multi-User Support
+
+Each user has their own isolated garage. Vehicles and maintenance records created by one user are not visible to other users.
+
+**Admin users** can see all vehicles and records across every user, with owner labels displayed on each car card. This makes it easy to manage a shared instance where multiple household members or team members each track their own vehicles.
+
+To create additional users, go to **Settings → Users → Add User** (admin only).
+
+---
+
+## User Roles & Permissions
+
+Garage Logbook uses two roles. The viewer role has been removed in favor of granular permission toggles on the editor role.
+
+### Admin
+
+Full, unrestricted access to everything: all vehicles and records across all users, user management, import, export, and all CRUD operations.
+
+### Editor
+
+Access is limited to the user's own vehicles and records. Admins can configure exactly what each editor is allowed to do by toggling individual permissions:
+
+| Permission | Default | Description |
+|---|---|---|
+| Add vehicles | ✓ | Create new vehicles |
+| Edit vehicles | ✓ | Modify existing vehicles |
+| Delete vehicles | ✓ | Remove vehicles and all associated records |
+| Add records | ✓ | Create maintenance records |
+| Edit records | ✓ | Modify existing records |
+| Delete records | ✓ | Remove maintenance records |
+| Import CSV | — | Import records from CSV files |
+| Export CSV | ✓ | Export records to CSV files |
+
+Permissions are configured per-user from **Settings → Users → Edit**.
+
+---
+
 ## Backup & Restore
 
 ### Backup
@@ -203,7 +243,7 @@ docker run --rm \
 docker compose up -d
 ```
 
-This creates `garage-logbook-backup.tar.gz` in your current directory containing the database and all uploaded images.
+This creates `garage-logbook-backup.tar.gz` in your current directory containing the database and all uploaded images and documents.
 
 ### Restore
 
@@ -227,10 +267,13 @@ git clone https://github.com/viibeware/garage-logbook.git
 cd garage-logbook
 cp .env.example .env
 # Edit .env and set your SECRET_KEY
-docker compose up -d --build
 ```
 
-When building from source, the compose file will use `build: .` context. Update the `image:` line to `build: .` in `docker-compose.yml`, or simply remove the `image:` line and add `build: .` in its place.
+Update `docker-compose.yml` to use `build: .` instead of `image: viibeware/garage-logbook:latest`, then:
+
+```bash
+docker compose up -d --build
+```
 
 ### Running without Docker
 
@@ -251,18 +294,6 @@ The app will be available at `http://localhost:5000`. The database and uploads w
 
 ---
 
-## User Roles
-
-| Role | View Data | Add/Edit/Delete Records | Manage Users | Import CSV |
-|---|---|---|---|---|
-| **Viewer** | ✓ | — | — | — |
-| **Editor** | ✓ | ✓ | — | — |
-| **Admin** | ✓ | ✓ | ✓ | ✓ |
-
-Only admin users can create new accounts. This is done from **Settings → Users** in the application.
-
----
-
 ## Project Structure
 
 ```
@@ -272,8 +303,11 @@ garage-logbook/
 ├── Dockerfile                # Container build instructions
 ├── docker-compose.yml        # Compose configuration
 ├── .env.example              # Environment variable template
+├── .github/
+│   └── workflows/
+│       └── release.yml       # Auto-create GitHub releases on tag push
 ├── static/
-│   ├── css/style.css         # Stylesheet
+│   ├── css/style.css         # Stylesheet (dark + light themes)
 │   ├── js/app.js             # Frontend JavaScript
 │   ├── garage-logbook_logo.svg
 │   ├── viibeware_logo.svg
@@ -295,4 +329,4 @@ This project is provided as-is for personal and internal use. See the repository
 
 Garage Logbook is developed by [viibeware Corp.](https://viibeware.com)
 
-Current version: **0.1.7**
+Current version: **0.1.9**
