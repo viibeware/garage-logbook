@@ -3,7 +3,7 @@ from functools import wraps
 from flask import (Flask, render_template, request, jsonify,
                    redirect, url_for, session, g, Response, send_from_directory)
 
-APP_VERSION = '0.1.9'
+APP_VERSION = '0.1.10'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'change-this-to-a-random-secret-key-in-production')
@@ -96,12 +96,12 @@ def init_db():
     try:
         cols = [r['name'] for r in conn.execute("PRAGMA table_info(cars)").fetchall()]
         if 'user_id' not in cols:
-            # Get first admin user id for existing cars
             admin = conn.execute("SELECT id FROM users WHERE role='admin' ORDER BY id LIMIT 1").fetchone()
-            admin_id = admin['id'] if admin else 1
-            conn.execute("ALTER TABLE cars ADD COLUMN user_id INTEGER NOT NULL DEFAULT ?", (admin_id,))
+            admin_id = int(admin['id']) if admin else 1
+            conn.execute(f"ALTER TABLE cars ADD COLUMN user_id INTEGER NOT NULL DEFAULT {admin_id}")
             conn.commit()
-    except: pass
+    except Exception as e:
+        print(f"Migration user_id: {e}")
     # Migration: update viewer role to editor
     try:
         conn.execute("UPDATE users SET role='editor' WHERE role='viewer'")
