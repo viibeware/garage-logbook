@@ -73,10 +73,10 @@ function loadSettingsUI(){
     document.getElementById('settingShowVehicles').checked=userSettings.show_vehicles!==false;
     document.getElementById('settingShowRecords').checked=userSettings.show_records!==false;
     document.getElementById('settingShowCost').checked=userSettings.show_cost!==false;
-    document.getElementById('settingTheme').value=userSettings.theme||'dark';
+    document.getElementById('settingThemeDark').checked=(userSettings.theme||'dark')==='dark';
 }
 const saveSettingsDebounced=debounce(async()=>{
-    userSettings={dashboard_range:document.getElementById('settingRange').value,show_vehicles:document.getElementById('settingShowVehicles').checked,show_records:document.getElementById('settingShowRecords').checked,show_cost:document.getElementById('settingShowCost').checked,theme:document.getElementById('settingTheme').value};
+    userSettings={dashboard_range:document.getElementById('settingRange').value,show_vehicles:document.getElementById('settingShowVehicles').checked,show_records:document.getElementById('settingShowRecords').checked,show_cost:document.getElementById('settingShowCost').checked,theme:document.getElementById('settingThemeDark').checked?'dark':'light'};
     applyTheme();
     try{await fetch('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(userSettings)});toast('Saved','success');loadDashboard()}catch(e){toast('Failed','error')}
 },500);
