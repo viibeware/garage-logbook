@@ -99,6 +99,7 @@ const APP_VERSION="{{version}}";
             <button class="settings-tab" onclick="switchSettingsTab('appearance')">Appearance</button>
             <button class="settings-tab admin-only" onclick="switchSettingsTab('users')">Users</button>
             <button class="settings-tab perm-can_import" onclick="switchSettingsTab('import')">Import CSV</button>
+            <button class="settings-tab" onclick="switchSettingsTab('about')">About</button>
         </div>
         <!-- Dashboard Tab -->
         <div class="settings-tab-content active" id="settingsTab-dashboard"><div class="settings-grid">
@@ -126,6 +127,144 @@ const APP_VERSION="{{version}}";
             <div id="importStep2" style="display:none"><div class="mapping-grid" id="mappingGrid"></div><div class="import-actions"><button class="btn btn-ghost" onclick="importGoToStep(1)">← Back</button><button class="btn btn-primary" id="importNextStep2" onclick="importRunDryRun()">Preview →</button></div></div>
             <div id="importStep3" style="display:none"><div class="import-summary" id="importSummary"></div><div class="import-errors" id="importErrors" style="display:none"><div class="import-errors-header" onclick="document.getElementById('importErrorsList').classList.toggle('collapsed')"><span id="importErrorCount">0</span><span style="color:var(--text-muted);font-size:0.7rem;margin-left:auto">toggle</span></div><div id="importErrorsList" class="import-errors-list"></div></div><div class="import-preview-table-wrap"><table class="import-preview-table"><thead><tr id="importPreviewHead"></tr></thead><tbody id="importPreviewBody"></tbody></table></div><div class="import-actions"><button class="btn btn-ghost" onclick="importGoToStep(2)">← Back</button><button class="btn btn-primary" id="importCommitBtn" onclick="importCommit()">Import</button></div></div>
             <div id="importStep4" style="display:none"><div class="import-done"><div class="import-done-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 9 10.5 14.5 8 12"/></svg></div><h2>Done</h2><p id="importDoneMsg" class="import-done-msg"></p><div class="import-actions" style="justify-content:center"><button class="btn btn-ghost" onclick="importReset()">Again</button><button class="btn btn-primary" onclick="importViewCar()">View</button></div></div></div>
+        </div>
+        <!-- About Tab -->
+        <div class="settings-tab-content" id="settingsTab-about">
+            <div class="about-section">
+                <div class="about-header">
+                    <img src="/static/garage-logbook_logo.svg" alt="" class="about-logo">
+                    <div class="about-title-block">
+                        <h3 class="about-app-name">Garage Logbook</h3>
+                        <span class="about-version">v{{version}}</span>
+                    </div>
+                </div>
+                <p class="about-desc">A self-hosted vehicle maintenance tracker. Keep detailed records of every repair, service, upgrade, and inspection across all your vehicles.</p>
+                <div class="about-links">
+                    <a href="https://viibeware.com" target="_blank" rel="noopener">viibeware.com</a>
+                    <a href="https://github.com/viibeware/garage-logbook" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://hub.docker.com/r/viibeware/garage-logbook" target="_blank" rel="noopener">Docker Hub</a>
+                    <a href="mailto:viibeware@proton.me">viibeware@proton.me</a>
+                </div>
+            </div>
+            <div class="changelog">
+                <h4 class="changelog-title">Changelog</h4>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.12</div>
+                    <ul>
+                        <li>New app logo and favicon</li>
+                        <li>Added About section with changelog and support contact</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.11</div>
+                    <ul>
+                        <li>Dark/light theme toggle switch replaces dropdown</li>
+                        <li>Settings modal fixed height to prevent layout shifting between tabs</li>
+                        <li>Settings button styled consistently with sidebar nav items</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.10</div>
+                    <ul>
+                        <li>Fixed database migration for multi-user support on existing installs</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.9</div>
+                    <ul>
+                        <li>Multi-user support with per-user data isolation</li>
+                        <li>Admins can view all users' vehicles and records with owner labels</li>
+                        <li>Granular permission toggles for editor role</li>
+                        <li>Removed viewer role in favor of configurable editor permissions</li>
+                        <li>Light and dark theme support</li>
+                        <li>Settings moved to a modal with blur backdrop</li>
+                        <li>Add Vehicle button moved into My Garage view</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.8</div>
+                    <ul>
+                        <li>PDF document upload support for maintenance records (receipts, invoices)</li>
+                        <li>Documents display as download links in record detail view</li>
+                        <li>Error handlers for 413 and 500 responses return JSON for API routes</li>
+                        <li>Resilient JS error handling for non-JSON server responses</li>
+                        <li>Gunicorn error logging and extended timeout</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.7</div>
+                    <ul>
+                        <li>Environment configuration via .env file</li>
+                        <li>Configurable port via APP_PORT variable</li>
+                        <li>Added .env.example template</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.6</div>
+                    <ul>
+                        <li>Renamed project from car-maintenance-tracker to garage-logbook</li>
+                        <li>New GL logo and favicon</li>
+                        <li>First-login password change prompt for default admin account</li>
+                        <li>Import CSV and Users moved from sidebar into Settings tabs</li>
+                        <li>Import button added to car detail view header</li>
+                        <li>Export button renamed to "Export All Records"</li>
+                        <li>viibeware Corp. branding links to viibeware.com</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.5</div>
+                    <ul>
+                        <li>Docker Compose packaging with named volume for persistent data</li>
+                        <li>Environment-configurable SECRET_KEY, DATABASE_PATH, and UPLOAD_FOLDER</li>
+                        <li>Upload serving route for Docker volume compatibility</li>
+                        <li>Database initialization runs at module level for gunicorn compatibility</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.4</div>
+                    <ul>
+                        <li>Inspection maintenance type added</li>
+                        <li>Record duplication feature</li>
+                        <li>"Parts Vendor" renamed to "Vendor"</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.3</div>
+                    <ul>
+                        <li>Authentication system with login/logout</li>
+                        <li>Role-based access control (admin, editor, viewer)</li>
+                        <li>viibeware Corp. branding</li>
+                        <li>Base font size set to 1.2rem</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.2</div>
+                    <ul>
+                        <li>AJAX-powered search across vehicles and maintenance records</li>
+                        <li>Sort options for maintenance records</li>
+                        <li>CSV export for maintenance records</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.1</div>
+                    <ul>
+                        <li>Maintenance record image gallery with lightbox viewer</li>
+                        <li>Dashboard with stats cards and recent activity</li>
+                        <li>Per-user settings for dashboard customization</li>
+                    </ul>
+                </div>
+                <div class="changelog-entry">
+                    <div class="changelog-version">0.1.0</div>
+                    <ul>
+                        <li>Initial release</li>
+                        <li>Vehicle management (add, edit, delete with photo upload)</li>
+                        <li>Maintenance record tracking with cost, mileage, vendor, and notes</li>
+                        <li>Dark theme UI with DM Sans typography</li>
+                        <li>SQLite database with WAL mode</li>
+                        <li>Mobile responsive layout</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div></div>
